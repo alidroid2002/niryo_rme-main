@@ -1,0 +1,45 @@
+from pyniryo import *
+
+# - Constants
+#Be careful about workspace's name
+workspace_name = "workspace1"  # Robot's Workspace Name
+#here we will decide the workspace
+robot_ip_address = "192.168.68.107"
+
+# The pose from where the image processing happens
+observation_pose = [0.214, -0.016, 0.253, -0.282, 1.462, -0.592]
+# Place pose
+place_pose = PoseObject(
+    x=0.005, y=-0.255, z=0.066,
+    roll=-0.653, pitch=1.518, yaw=-1.650,
+)
+
+# - Initialization
+#This code will pick four object
+count = 4
+# Connect to robot
+robot = NiryoRobot(robot_ip_address)
+# Calibrate robot if the robot needs calibration
+robot.calibrate_auto()
+# Updating tool
+robot.update_tool()
+robot.release_with_tool()
+
+while count:
+   
+    robot.move_pose(observation_pose)
+    # Trying to pick target using camera
+    obj_found, obj_pose, shape_ret, color_ret = robot.get_target_pose_from_cam(workspace_name)
+    print(obj_pose)
+    print(shape_ret)
+    print(color_ret)
+    
+    if obj_found:
+        robot.pick_from_pose(obj_pose)
+        
+        robot.place_from_pose(place_pose)
+
+    count-=1
+   
+
+robot.close_connection()
